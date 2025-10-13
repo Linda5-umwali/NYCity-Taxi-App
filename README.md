@@ -7,6 +7,40 @@ The NewYorkCity Taxi App is an enterprise-level fullstack application designed t
 - Database: MySQL
 - Frontend: HTML, CSS, JavaScript
 
+## Project structure
+```
+NYCity-Taxi-App/
+│
+├── backend/
+│   ├── app.py                # Flask (or server.js if Node)
+│   ├── requirements.txt      # Python dependencies
+│   ├── data_processing.py    # data cleaning & feature generation
+│   ├── database/
+│   │   ├── schema.sql        # DB schema
+│   │   └── insert_data.py    # script to insert cleaned data
+│   └── api/
+│       └── routes.py         # API endpoints
+│
+├── frontend/
+│   ├── index.html
+│   ├── styles.css
+│   ├── script.js
+│   └── assets/               # (optional) charts, icons, etc.
+│
+├── data/
+│   ├── raw/                  # original CSV from train.zip
+│   ├── cleaned/              # processed dataset
+│   └── logs/                 # invalid or excluded records
+│
+├── docs/
+│   ├── report.pdf            # your final documentation
+│   └── architecture-diagram.png
+│
+├── README.md
+└── .gitignore
+
+```
+
 ## Setup Instructions
 ```
 # clone the repo
