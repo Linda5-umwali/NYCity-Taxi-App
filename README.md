@@ -66,6 +66,6 @@ The app uses the official New York City Taxi Trip Dataset, which includes timest
 
 ## Documentation
 
-- Report (PDF): Explains data cleaning, design decisions, algorithmic logic, and insights. find the doc here: link
+- Report (PDF): Explains data cleaning, design decisions, algorithmic logic, and insights. find the doc here: [https://docs.google.com/document/d/1PyG9kqjDzHFR89xh91mvlmXYHVLleR2Xr8rZ855QgrE/edit?usp=sharing]
 
 - Video Demo: 5-minute walkthrough showing features and architecture. find video here: link
