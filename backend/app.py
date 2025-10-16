@@ -1,65 +1,98 @@
-from flask import Flask, jsonify, request
-import pandas as pd
+from flask import Flask, jsonify
+import mysql.connector
 import os
 
-CLEANED_DATA_PATH = "../data/cleaned/cleaned_taxi.csv"
+DB_CONFIG = {
+    "host": "127.0.0.1",
+    "user": "data_loader",
+    "password": "db_pass",
+    "database": "nyc_taxi_db",
+    "auth_plugin": "mysql_native_password"
+}
+
+TABLE_NAME = "taxi_trips"
 
 app = Flask(__name__)
 
-# Load cleaned data into memory once at startup
-if not os.path.exists(CLEANED_DATA_PATH):
-    raise FileNotFoundError(f"Cleaned CSV not found at {CLEANED_DATA_PATH}. Run data_processing.py first.")
+def connect_db():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        return conn
+    except mysql.connector.Error as err:
+        return jsonify({"error": f"Database connection failed: {err}"}), 500
 
-df = pd.read_csv(CLEANED_DATA_PATH)
+def get_data_from_db(query):
+    conn = connect_db()
+    if isinstance(conn, tuple):
+        return conn
 
-def filter_trips(dataframe, params):
-    """Filter trips based on query parameters"""
-    df_filtered = dataframe.copy()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except mysql.connector.Error as err:
+        conn.close()
+        return jsonify({"error": f"MySQL Query Error: {err}"}), 500
 
-    # Filter by pickup_hour
-    if "pickup_hour" in params:
-        hours = [int(h) for h in params.get("pickup_hour").split(",")]
-        df_filtered = df_filtered[df_filtered['pickup_hour'].isin(hours)]
+@app.route('/api/trip_summary', methods=['GET'])
+def trip_summary():
+    query = f"""
+        SELECT
+            COUNT(id) AS total_trips,
+            AVG(trip_distance) AS avg_distance_km,
+            AVG(fare_amount) AS avg_fare,
+            SUM(CASE WHEN speed_outlier = TRUE THEN 1 ELSE 0 END) AS total_outliers
+        FROM {TABLE_NAME};
+    """
+    
+    result = get_data_from_db(query)
 
-    # Filter by trip_distance
-    min_dist = float(params.get("min_distance", 0))
-    max_dist = float(params.get("max_distance", df_filtered['trip_distance'].max()))
-    df_filtered = df_filtered[(df_filtered['trip_distance'] >= min_dist) & (df_filtered['trip_distance'] <= max_dist)]
+    if isinstance(result, tuple):
+        return result
 
-    # Filter by trip_speed
-    max_speed = float(params.get("max_speed", df_filtered['trip_speed'].max()))
-    df_filtered = df_filtered[df_filtered['trip_speed'] <= max_speed]
+    if result:
+        data = result[0]
+        summary = {
+            "total_trips": int(data['total_trips']) if data['total_trips'] is not None else 0,
+            "avg_distance_km": round(float(data['avg_distance_km']), 2) if data['avg_distance_km'] is not None else 0.0,
+            "avg_fare": round(float(data['avg_fare']), 2) if data['avg_fare'] is not None else 0.0,
+            "total_outliers": int(data['total_outliers']) if data['total_outliers'] is not None else 0
+        }
+        return jsonify(summary)
+    
+    return jsonify({"error": "No data found"}), 404
 
-    return df_filtered
+@app.route('/api/hourly_metrics', methods=['GET'])
+def hourly_metrics():
+    query = f"""
+        SELECT
+            pickup_hour,
+            COUNT(id) AS total_trips,
+            AVG(trip_speed) AS avg_speed_kmh,
+            AVG(fare_amount) AS avg_fare
+        FROM {TABLE_NAME}
+        GROUP BY pickup_hour
+        ORDER BY pickup_hour;
+    """
+    
+    result = get_data_from_db(query)
 
-@app.route("/")
-def home():
-    return jsonify({
-        "message": "Welcome to NYC Taxi API!",
-        "endpoints": ["/trips", "/stats/peak-hours", "/stats/speed-outliers"]
-    })
+    if isinstance(result, tuple):
+        return result
+    
+    metrics = []
+    for row in result:
+        metrics.append({
+            "hour": row['pickup_hour'],
+            "trips": int(row['total_trips']),
+            "avg_speed": round(float(row['avg_speed_kmh']), 2),
+            "avg_fare": round(float(row['avg_fare']), 2)
+        })
 
-@app.route("/trips", methods=["GET"])
-def get_trips():
-    """Return trips, optionally filtered by query parameters"""
-    filtered_df = filter_trips(df, request.args)
-    # Return only first 100 rows for performance
-    return jsonify(filtered_df.head(100).to_dict(orient="records"))
+    return jsonify(metrics)
 
-@app.route("/stats/peak-hours", methods=["GET"])
-def get_peak_hours():
-    """Return peak hours based on trip volume"""
-    hourly_counts = df['pickup_hour'].value_counts().sort_index()
-    mean_count = hourly_counts.mean()
-    std_count = hourly_counts.std()
-    peak_hours = hourly_counts[hourly_counts > (mean_count + std_count)].index.tolist()
-    return jsonify({"peak_hours": peak_hours})
-
-@app.route("/stats/speed-outliers", methods=["GET"])
-def get_speed_outliers():
-    """Return trips flagged as speed outliers"""
-    outliers = df[df['speed_outlier'] == True]
-    return jsonify(outliers.head(100).to_dict(orient="records"))
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
