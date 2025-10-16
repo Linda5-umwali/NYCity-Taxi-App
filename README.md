@@ -4,6 +4,7 @@ The NewYorkCity Taxi App is an enterprise-level fullstack application designed t
 ## Tech Stack
 
 - Backend: Node.js
+- Data processing: python
 - Database: MySQL
 - Frontend: HTML, CSS, JavaScript
 
@@ -12,30 +13,25 @@ The NewYorkCity Taxi App is an enterprise-level fullstack application designed t
 NYCity-Taxi-App/
 │
 ├── backend/
-│   ├── app.py                # Flask (or server.js if Node)
-│   ├── requirements.txt      # Python dependencies
-│   ├── data_processing.py    # data cleaning & feature generation
+│   ├── app.py 
+│   ├── requirements.txt
+│   ├── data_processing.py
 │   ├── database/
-│   │   ├── schema.sql        # DB schema
-│   │   └── insert_data.py    # script to insert cleaned data
+│   │   ├── schema.sql
+│   │   └── insert_data.py
 │   └── api/
-│       └── routes.py         # API endpoints
+│       └── routes.py
 │
 ├── frontend/
-│   ├── index.html
-│   ├── styles.css
-│   ├── script.js
-│   └── assets/               # (optional) charts, icons, etc.
+│   └── index.html
 │
 ├── data/
-│   ├── raw/                  # original CSV from train.zip
-│   ├── cleaned/              # processed dataset
-│   └── logs/                 # invalid or excluded records
-│
-├── docs/
-│   ├── report.pdf            # your final documentation
-│   └── architecture-diagram.png
-│
+│   ├── raw/                 
+│   ├── cleaned/
+│   │   └── cleaned_taxi.csv
+│   └── logs/
+│       └── cleaning_log.csv
+├── NYC Taxi Data                # PDF report
 ├── README.md
 └── .gitignore
 
@@ -49,15 +45,22 @@ git clone https://github.com/Linda5-umwali/NYCity-Taxi-App.git
 # navigate to the project folder
 cd NYCity-Taxi-App
 
+# Create and activate environment(venv)
+python -m venv venv
+source venv/bin/activate
+
+# independencies
+pip install -r requirements.txt
+
 # backend
 cd backend
-pip install -r be.txt
+python db_data.py
 
 # frontend
 cd NYCity-Taxi-App/frontend
 
 # Run the app
-python app.py
+python3 app.py
 ```
 
 ## Dataset
@@ -66,6 +69,6 @@ The app uses the official New York City Taxi Trip Dataset, which includes timest
 
 ## Documentation
 
-- Report (PDF): Explains data cleaning, design decisions, algorithmic logic, and insights. find the doc here: [https://docs.google.com/document/d/1PyG9kqjDzHFR89xh91mvlmXYHVLleR2Xr8rZ855QgrE/edit?usp=sharing]
+- Report (PDF): Explains data cleaning, design decisions, algorithmic logic, and insights. find the doc online here: [https://docs.google.com/document/d/1PyG9kqjDzHFR89xh91mvlmXYHVLleR2Xr8rZ855QgrE/edit?tab=t.0]
 
-- Video Demo: 5-minute walkthrough showing features and architecture. find video here: link
+- Video Demo: 5-minute walkthrough showing features and architecture. find video here: [video]
