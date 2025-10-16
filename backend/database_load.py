@@ -4,8 +4,8 @@ import os
 
 DB_CONFIG = {
     "host": "127.0.0.1",
-    "user": "Linda5-umwali",
-    "password": "passcode.",
+    "user": "data_loader",
+    "password": "db_pass",
     "database": "nyc_taxi_db"
 }
 
