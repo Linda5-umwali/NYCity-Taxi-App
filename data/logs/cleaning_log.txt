@@ -1,0 +1,3 @@
+Rows before cleaning: 1458644
+Rows after dropna & duplicates: 1458644
+Removed 16274 invalid records based on trip distance/duration
