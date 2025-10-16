@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 DB_CONFIG = {
-    "host": "localhost",
+    "host": "127.0.0.1",
     "user": "Linda5-umwali",
     "password": "passcode.",
     "database": "nyc_taxi_db"
