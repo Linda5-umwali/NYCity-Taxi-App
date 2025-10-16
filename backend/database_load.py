@@ -2,7 +2,6 @@ import mysql.connector
 import pandas as pd
 import os
 
-# --- CONFIG ---
 DB_CONFIG = {
     "host": "localhost",
     "user": "Linda5-umwali",
@@ -11,9 +10,10 @@ DB_CONFIG = {
 }
 
 TABLE_NAME = "taxi_trips"
-CSV_PATH = "../data/cleaned/cleaned_taxi.csv"
 
-# --- CONNECT TO DATABASE ---
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CSV_PATH = os.path.join(SCRIPT_DIR, "../data/cleaned/cleaned_taxi.csv")
+
 def connect_db():
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
@@ -23,55 +23,87 @@ def connect_db():
         print("Database connection error:", err)
         exit(1)
 
-# --- CREATE TABLE IF NOT EXISTS ---
 def create_table(cursor):
     cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id BIGINT AUTO_INCREMENT PRIMARY KEY,
             pickup_datetime DATETIME,
             trip_distance FLOAT,
             trip_duration_sec INT,
-            passenger_count INT,
+            passenger_count TINYINT,
             fare_amount FLOAT,
             trip_speed FLOAT,
             fare_per_km FLOAT,
-            pickup_hour INT,
+            pickup_hour TINYINT,
             speed_outlier BOOLEAN
         );
     """)
     print(f"Table `{TABLE_NAME}` is ready.")
 
-# --- INSERT DATA ---
 def insert_data(df, conn):
     cursor = conn.cursor()
-    create_table(cursor)
 
-    insert_query = f"""
-        INSERT INTO {TABLE_NAME} 
-        (pickup_datetime, trip_distance, trip_duration_sec, passenger_count,
-         fare_amount, trip_speed, fare_per_km, pickup_hour, speed_outlier)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
-
-    rows = df[[
+    COLUMNS = [
         'pickup_datetime', 'trip_distance', 'trip_duration_sec', 'passenger_count',
         'fare_amount', 'trip_speed', 'fare_per_km', 'pickup_hour', 'speed_outlier'
-    ]].values.tolist()
+    ]
+
+    missing_cols = [col for col in COLUMNS if col not in df.columns]
+    if missing_cols:
+        print(f"Error: Missing columns in CSV chunk: {missing_cols}")
+        return
+
+    rows = df[COLUMNS].values.tolist()
+
+    placeholders = ', '.join(['%s'] * len(COLUMNS))
+    
+    insert_query = f"""
+        INSERT INTO {TABLE_NAME}
+        ({', '.join(COLUMNS)})
+        VALUES ({placeholders})
+    """
 
     cursor.executemany(insert_query, rows)
     conn.commit()
     print(f"Inserted {cursor.rowcount} rows into `{TABLE_NAME}`.")
+    cursor.close() 
 
-# --- MAIN ---
 def main():
     print("Loading cleaned CSV into MySQL...")
-    df = pd.read_csv(CSV_PATH)
+    
+    CHUNKSIZE = 50000 
+    total_inserted_rows = 0
 
-    conn = connect_db()
-    insert_data(df, conn)
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        create_table(cursor)
+        cursor.close()
 
-    conn.close()
-    print("Done. Connection closed.")
+        for chunk in pd.read_csv(CSV_PATH, chunksize=CHUNKSIZE):
+            chunk = chunk.where(pd.notnull(chunk), None)
+            
+            if 'pickup_datetime' in chunk.columns:
+                 chunk['pickup_datetime'] = pd.to_datetime(chunk['pickup_datetime'])
+            
+            insert_data(chunk, conn)
+            total_inserted_rows += len(chunk)
+            print(f"  > Inserted batch. Total rows: {total_inserted_rows}")
+
+        conn.close()
+        print(f"\nSuccessfully loaded {total_inserted_rows} total rows.")
+        print("Done. Connection closed.")
+
+    except FileNotFoundError:
+        print(f"\nFATAL ERROR: CSV file not found at: {CSV_PATH}")
+        print("Please ensure your 'cleaned_taxi.csv' file is in the 'data/cleaned/' directory.")
+        exit(1)
+    except mysql.connector.Error as err:
+        print(f"\nMySQL Error during data insertion: {err}")
+        exit(1)
+    except Exception as e:
+        print(f"\nAn unexpected error occurred: {e}")
+        exit(1)
 
 if __name__ == "__main__":
     main()
