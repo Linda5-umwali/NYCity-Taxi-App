@@ -3,6 +3,334 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NYC Taxi</title>
+  <title>NYC Taxi App</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --card-overlay: rgba(255, 255, 255, 0.9);
+      --navbar-bg: rgba(255, 255, 255, 0.95);
+      --button-bg: #092531;
+      --button-text: #ffffff;
+    }
+
+    body.dark {
+      --bg-color: #0F172A;
+      --text-color: #ffffff;
+      --card-overlay: rgba(0, 0, 0, 0.7);
+      --navbar-bg: rgba(15, 23, 42, 0.95);
+      --button-bg: #436270;
+      --button-text: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      scroll-behavior: smooth;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    nav {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navbar-bg);
+      padding: 10px 25px;
+      border-radius: 30px;
+      z-index: 1000;
+      display: flex;
+      gap: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #0A84FF;
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      padding: 5px 10px;
+      background: var(--button-bg);
+      color: var(--button-text);
+      border-radius: 20px;
+      font-size: 0.8em;
+      margin-left: auto;
+    }
+
+    section {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      padding: 60px 40px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    p1 {
+      font-size: 1.3em;
+      font-weight: normal;
+      color: #ffffff;
+      margin-top: 1px;
+      max-width: 700px;
+      text-align: center;
+      padding-top: 0px;
+    }
+
+    /* --- SECTION 1: HOME --- */
+    #home {
+      background: url('https://images.unsplash.com/photo-1557211300-9991249b466a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171') center center/cover no-repeat;
+      color: white;
+      height: 100vh;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    #home h1 {
+      font-size: 4em;
+      font-weight: bold;
+      padding-bottom: 90px;
+    }
+
+    #home p {
+      font-size: 1.3em;
+      margin-top: 20px;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    .cta-btn {
+      margin-top: 30px;
+      padding: 15px 30px;
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: none;
+      border-radius: 30px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    /* --- SECTION 2: BOOK --- */
+    #book {
+      background: #486673;
+      color: white;
+      flex-wrap: wrap;
+    }
+
+    .book-text {
+      flex: 1;
+      padding-right: 40px;
+    }
+
+    .carousel {
+      flex: 1;
+      max-width: 500px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+    }
+
+    .carousel img {
+      width: 100%;
+      display: none;
+      object-fit: cover;
+      height: 300px;
+    }
+
+    .carousel img.active {
+      display: block;
+    }
+
+    /* --- SECTION 3: TRACK --- */
+    #track {
+      background-color: #041036;
+      color: white;
+      flex-direction: column;
+    }
+
+    .cards {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .card {
+      width: 300px;
+      height: 250px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-content {
+      position: absolute;
+      bottom: 0;
+      background: var(--card-overlay);
+      color: var(--text-color);
+      padding: 20px;
+      width: 100%;
+    }
+
+    /* --- SECTION 4: PRICING --- */
+    #pricing {
+      background-color: #550000;
+      color: white;
+      flex-direction: column;
+    }
+
+    #pricing h2 {
+      font-size: 2em;
+    }
+
+    /* --- SECTION 5: CONTACT --- */
+    #contact {
+      background-color: #0F172A;
+      color: white;
+      flex-direction: column;
+    }
+
+    #contact p {
+      max-width: 600px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      #book {
+        flex-direction: column;
+      }
+
+      .carousel, .book-text {
+        padding: 0;
+        width: 100%;
+      }
+
+      .cards {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      nav {
+        flex-direction: column;
+        gap: 10px;
+        top: 10px;
+      }
+    }
+  </style>
 </head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#book">Book</a>
+    <a href="#track">Track</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+    <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
+  </nav>
+
+  <!-- Section 1: Home -->
+  <section id="home">
+    <h1>The NYC Taxi App</h1>
+    <p1>Discover how New York City moves. This section reveals patterns hidden within thousands of taxi rides, from peak hours and popular pickup zones to distance and fare trends. Dive into the visuals to see how everyday trips shape the rhythm of the city.</p1>
+  </section>
+
+  <!-- Section 2: Booking -->
+  <section id="book">
+    <div class="book-text">
+      <h2>Book Your Ride</h2>
+      <p>Discover how New York City moves. This section reveals patterns hidden within thousands of taxi rides, from peak hours and popular pickup zones to distance and fare trends. Dive into the visuals to see how everyday trips shape the rhythm of the city.</p>
+    </div>
+    <div class="carousel">
+      <img src="https://media.istockphoto.com/id/2212329390/photo/new-york-city-times-square-zebra-crossing-at-night-nyc.webp?a=1&b=1&s=612x612&w=0&k=20&c=jfsPamAwbxeALpnjZIhf7WVnfkVs1E_PuWEK-8tZI4U=" class="active" alt="NYC 1" />
+      <img src="https://images.unsplash.com/photo-1498618382752-02689e335b14?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600" alt="NYC 2" />
+      <img src="https://images.unsplash.com/photo-1601741546059-dea33c8acb50?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600" alt="NYC 3" />
+      <img src="https://images.unsplash.com/photo-1527267207156-3372670819dc?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600" alt="Bus" />
+    </div>
+  </section>
+
+  <!-- Section 3: Tracking -->
+  <section id="track">
+    <h2>Track Your Taxi</h2>
+    <div class="cards">
+      <div class="card" style="background-image: url('https://images.unsplash.com/photo-1655301885359-e69037231c49?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600');">
+        <div class="card-content">
+          <h3>Live Map View</h3>
+          <p>See your cab in real time as it navigates toward you.</p>
+        </div>
+      </div>
+      <div class="card" style="background-image: url('https://images.unsplash.com/photo-1539967160601-d118b0917325?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG5ldyUyMHlvcmslMjBjaXR5JTIwZHJpdmVyc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600');">
+        <div class="card-content">
+          <h3>Your Driver</h3>
+          <p>Know who's picking you up — details, ratings & more.</p>
+        </div>
+      </div>
+      <div class="card" style="background-image: url('https://media.istockphoto.com/id/2156308388/photo/crosswalk-new-york-street-scene-usa-stock-photo.webp?a=1&b=1&s=612x612&w=0&k=20&c=mGJaaNnMtzXIsDKanEchizLQD-rteGAH1w-BuJVcUwQ=');">
+        <div class="card-content">
+          <h3>Smart ETA</h3>
+          <p>Stay updated with live arrival estimates.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Pricing -->
+  <section id="pricing">
+    <h2>Transparent Pricing</h2>
+    <p>No hidden fees. View estimates before you book. Ride stress-free.</p>
+  </section>
+
+  <!-- Section 5: Contact -->
+  <section id="contact">
+    <h2>Contact & Support</h2>
+    <p>We’re always here to help — reach us 24/7 via chat, call, or email.</p>
+  </section>
+
+  <!-- Scripts -->
+  <script>
+    // Carousel
+    let current = 0;
+    const images = document.querySelectorAll('.carousel img');
+
+    setInterval(() => {
+      images[current].classList.remove('active');
+      current = (current + 1) % images.length;
+      images[current].classList.add('active');
+    }, 3000);
+
+    // Theme Toggle
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    }
+
+    // Load saved theme
+    window.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark");
+      }
+    });
+  </script>
+
+</body>
 </html>
