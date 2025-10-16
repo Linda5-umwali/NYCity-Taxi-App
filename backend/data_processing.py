@@ -81,7 +81,7 @@ def clean_data():
     df.drop_duplicates(inplace=True)
     df.dropna(inplace=True)
     after_clean_count = len(df)
-
+    
     # Handle invalid records
     invalid_records = df[(df['trip_distance'] < 0.1) | (df['trip_duration_sec'] <= 60)]
     invalid_count = len(invalid_records)
