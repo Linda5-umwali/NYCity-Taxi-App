@@ -1,336 +1,646 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NYC Taxi Data</title>
-  <style>
-    :root {
-      --bg-color: #ffffff;
-      --text-color: #000000;
-      --card-overlay: rgba(255, 255, 255, 0.9);
-      --navbar-bg: rgba(255, 255, 255, 0.95);
-      --button-bg: #092531;
-      --button-text: #ffffff;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>NYC Taxi Data Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        /* Custom Icons (Simplified SVG for single file mandate) */
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* --- Root Variables for Theming --- */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg: #ffffff;
+            --navbar-bg: rgba(255, 255, 255, 0.95);
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --button-bg: #0d6efd;
+            --button-text: #ffffff;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
-    body.dark {
-      --bg-color: #0F172A;
-      --text-color: #ffffff;
-      --card-overlay: rgba(0, 0, 0, 0.7);
-      --navbar-bg: rgba(15, 23, 42, 0.95);
-      --button-bg: #436270;
-      --button-text: #ffffff;
-    }
+        body.dark {
+            --bg-color: #0F172A;
+            --text-color: #f8f9fa;
+            --card-bg: #1e293b;
+            --navbar-bg: rgba(15, 23, 42, 0.95);
+            --primary-color: #5398ff;
+            --secondary-color: #adb5bd;
+            --button-bg: #436270;
+            --button-text: #ffffff;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+        /* --- Base Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      scroll-behavior: smooth;
-      transition: background-color 0.3s, color 0.3s;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            scroll-behavior: smooth;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-    nav {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--navbar-bg);
-      padding: 10px 25px;
-      border-radius: 30px;
-      z-index: 1000;
-      display: flex;
-      gap: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+        /* --- Navigation Bar --- */
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--navbar-bg);
+            backdrop-filter: blur(10px);
+            padding: 10px 25px;
+            border-radius: 30px;
+            z-index: 1000;
+            display: flex;
+            gap: 20px;
+            box-shadow: var(--box-shadow);
+        }
 
-    nav a {
-      text-decoration: none;
-      color: var(--text-color);
-      font-weight: bold;
-      transition: color 0.3s;
-    }
+        nav a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 15px;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-    nav a:hover {
-      color: #0A84FF;
-    }
+        nav a:hover, nav a.active {
+            background-color: var(--primary-color);
+            color: var(--button-text);
+        }
 
-    .theme-toggle {
-      cursor: pointer;
-      padding: 5px 10px;
-      background: var(--button-bg);
-      color: var(--button-text);
-      border-radius: 20px;
-      font-size: 0.8em;
-      margin-left: auto;
-    }
+        .theme-toggle {
+            cursor: pointer;
+            padding: 5px 15px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 15px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
 
-    section {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: left;
-      padding: 60px 40px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    p1 {
-      font-size: 1.3em;
-      font-weight: normal;
-      color: #ffffff;
-      margin-top: 1px;
-      max-width: 700px;
-      text-align: center;
-      padding-top: 0px;
-    }
+        /* --- Section Defaults --- */
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 40px 60px; /* Increased top padding to clear fixed navbar */
+            transition: background-color 0.3s, color 0.3s;
+            gap: 30px;
+        }
 
-    /* --- SECTION 1: HOME --- */
-    #home {
-      background: url('https://images.unsplash.com/photo-1557211300-9991249b466a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171') center center/cover no-repeat;
-      color: white;
-      height: 100vh;
-      flex-direction: column;
-      justify-content: center;
-      position: relative;
-    }
+        h1 {
+            font-size: 3em;
+            font-weight: 800;
+        }
+        
+        h2 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        p { /* Corrected from p1 to p */
+            font-size: 1.1em;
+            font-weight: normal;
+            line-height: 1.6;
+            max-width: 800px;
+            text-align: center;
+            color: var(--secondary-color);
+        }
+        
+        /* --- Section 1: HOME (Hero) --- */
+        #home {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1557211300-9991249b466a?auto=format&fit=crop&q=80&w=1171') center center/cover no-repeat;
+            color: white;
+            justify-content: center;
+        }
 
-    #home h1 {
-      font-size: 4em;
-      font-weight: bold;
-      padding-bottom: 90px;
-    }
+        #home h1 {
+            font-size: 5em;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        }
 
-    #home p {
-      font-size: 1.3em;
-      margin-top: 20px;
-      max-width: 700px;
-      text-align: center;
-    }
+        #home p {
+            font-size: 1.5em;
+            margin-top: 20px;
+            max-width: 800px;
+            line-height: 1.5;
+            color: #ffffff; /* Override p default for contrast */
+        }
 
-    .cta-btn {
-      margin-top: 30px;
-      padding: 15px 30px;
-      background: var(--button-bg);
-      color: var(--button-text);
-      border: none;
-      border-radius: 30px;
-      font-size: 1em;
-      cursor: pointer;
-    }
+        .cta-btn {
+            margin-top: 30px;
+            padding: 15px 35px;
+            background: var(--primary-color);
+            color: var(--button-text);
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 108, 253, 0.4);
+            transition: background-color 0.3s, transform 0.2s;
+        }
 
-    /* --- SECTION 2: BOOK --- */
-    #book {
-      background: #486673;
-      color: white;
-      flex-wrap: wrap;
-    }
+        .cta-btn:hover {
+            background-color: #0a58ca;
+            transform: translateY(-2px);
+        }
 
-    .book-text {
-      flex: 1;
-      padding-right: 40px;
-    }
+        /* --- Section 2: PATTERNS (Description/Carousel) --- */
+        #patterns {
+            background: #f0f4f7;
+            color: #212529;
+            min-height: 80vh;
+            padding: 80px 40px;
+            text-align: left;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+        }
+        body.dark #patterns {
+            background: #1e293b;
+            color: #f8f9fa;
+        }
 
-    .carousel {
-      flex: 1;
-      max-width: 500px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 15px;
-    }
+        .patterns-text {
+            flex: 1;
+            max-width: 45%;
+            padding-right: 40px;
+        }
+        
+        .patterns-text h2 {
+            color: #3b82f6;
+        }
+        body.dark .patterns-text h2 {
+            color: #5398ff;
+        }
 
-    .carousel img {
-      width: 100%;
-      display: none;
-      object-fit: cover;
-      height: 300px;
-    }
 
-    .carousel img.active {
-      display: block;
-    }
+        .carousel {
+            flex: 1;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+        }
 
-    /* --- SECTION 3: TRACK --- */
-    #track {
-      background-color: #041036;
-      color: white;
-      flex-direction: column;
-    }
+        .carousel img {
+            width: 100%;
+            display: none;
+            object-fit: cover;
+            height: 300px;
+            transition: opacity 1s;
+        }
 
-    .cards {
-      display: flex;
-      gap: 20px;
-      margin-top: 30px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+        .carousel img.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* --- Section 3: SUMMARY DASHBOARD (Cards) --- */
+        #summary-dashboard { /* Renamed from #track */
+            background-color: var(--bg-color);
+        }
+        
+        #summary-dashboard h2 {
+            margin-top: 0;
+        }
 
-    .card {
-      width: 300px;
-      height: 250px;
-      background-size: cover;
-      background-position: center;
-      border-radius: 15px;
-      overflow: hidden;
-      position: relative;
-    }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+        }
 
-    .card-content {
-      position: absolute;
-      bottom: 0;
-      background: var(--card-overlay);
-      color: var(--text-color);
-      padding: 20px;
-      width: 100%;
-    }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-align: left;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
 
-    /* --- SECTION 4: PRICING --- */
-    #pricing {
-      background-color: #550000;
-      color: white;
-      flex-direction: column;
-    }
+        .card h3 {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
 
-    #pricing h2 {
-      font-size: 2em;
-    }
+        .card-value {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-top: 5px;
+            display: flex;
+            align-items: baseline;
+        }
+        
+        .card-unit {
+            font-size: 0.6em;
+            font-weight: 400;
+            margin-left: 5px;
+            color: var(--secondary-color);
+        }
+        
+        .card-icon {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            color: var(--secondary-color);
+            opacity: 0.2;
+        }
+        
+        /* --- Section 4: HOURLY DATA (Chart) --- */
+        #hourly-data { /* Renamed from #pricing */
+            background-color: #e9ecef;
+            padding: 80px 40px;
+            min-height: 80vh;
+        }
+        body.dark #hourly-data {
+            background-color: #151e2a;
+        }
+        
+        #chart-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            min-height: 450px;
+        }
+        
+        /* --- Section 5: FOOTER --- */
+        #footer { /* Renamed from #contact */
+            min-height: 30vh; 
+            background-color: #041036;
+            color: white;
+            padding-top: 60px;
+        }
+        body.dark #footer {
+             background-color: var(--text-color);
+        }
+        #footer h2 {
+            color: white;
+        }
+        
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 992px) {
+            #patterns {
+                flex-direction: column;
+                text-align: center;
+            }
 
-    /* --- SECTION 5: CONTACT --- */
-    #contact {
-      background-color: #0F172A;
-      color: white;
-      flex-direction: column;
-    }
+            .patterns-text {
+                max-width: 100%;
+                padding: 0;
+                margin-bottom: 40px;
+            }
+            
+            .carousel {
+                max-width: 90%;
+            }
+            
+            #home h1 {
+                font-size: 4em;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            #home h1 {
+                font-size: 3em;
+            }
+            
+            section {
+                padding: 80px 20px 40px;
+            }
 
-    #contact p {
-      max-width: 600px;
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      #book {
-        flex-direction: column;
-      }
-
-      .carousel, .book-text {
-        padding: 0;
-        width: 100%;
-      }
-
-      .cards {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      nav {
-        flex-direction: column;
-        gap: 10px;
-        top: 10px;
-      }
-    }
-  </style>
+            nav {
+                gap: 10px;
+                padding: 8px 15px;
+                width: 90%;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            nav a {
+                padding: 5px 8px;
+            }
+            .theme-toggle {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#book">patterns</a>
-    <a href="#track">Dashboard</a>
-    <a href="#pricing">Trip</a>
-    <a href="#contact">Stop</a>
-    <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
-  </nav>
+    <!-- Navbar -->
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#patterns">Patterns</a>
+        <a href="#summary-dashboard">Summary</a>
+        <a href="#hourly-data">Hourly Data</a>
+        <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
+    </nav>
 
-  <!-- Section 1: Home -->
-  <section id="home">
-    <h1>The NYC Taxi App</h1>
-    <p1>Discover how New York City moves. This section reveals patterns hidden within thousands of taxi rides, from peak hours and popular pickup zones to distance and fare trends. Dive into the visuals to see how everyday trips shape the rhythm of the city.</p1>
-  </section>
+    <!-- Section 1: Home (Hero) -->
+    <section id="home">
+        <h1>NYC Taxi Data Dashboard</h1>
+        <p>Discover how New York City moves. This live dashboard visualizes key metrics and patterns hidden within millions of taxi rides, providing real-time insights into trip trends, fares, and speed.</p>
+        <a href="#summary-dashboard" class="cta-btn">View Live Dashboard</a>
+    </section>
 
-  <!-- loading -->
-  <section id="book">
-    <div class="book-text">
-      <h2>Book Your Ride</h2>
-      <p>Fetching patterns ...</p>
-    </div>
-    <div class="carousel">
-      <img src="https://media.istockphoto.com/id/2212329390/photo/new-york-city-times-square-zebra-crossing-at-night-nyc.webp?a=1&b=1&s=612x612&w=0&k=20&c=jfsPamAwbxeALpnjZIhf7WVnfkVs1E_PuWEK-8tZI4U=" class="active" alt="NYC 1" />
-      <img src="https://images.unsplash.com/photo-1498618382752-02689e335b14?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600" alt="NYC 2" />
-      <img src="https://images.unsplash.com/photo-1601741546059-dea33c8acb50?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600" alt="NYC 3" />
-      <img src="https://images.unsplash.com/photo-1527267207156-3372670819dc?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600" alt="Bus" />
-    </div>
-  </section>
-
-  <!-- Section 3: Dashboard -->
-  <section id="track">
-    <h2>Dashboard</h2>
-    <div class="cards">
-      <div class="card" style="background-image: url('https://images.unsplash.com/photo-1655301885359-e69037231c49?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fG5ldyUyMHlvcmslMjBjaXR5JTIwcm9hZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600');">
-        <div class="card-content">
-          <h3>Total trips</h3>
-          <p>...</p>
+    <!-- Section 2: Patterns (Description/Carousel) -->
+    <section id="patterns">
+        <div class="patterns-text">
+            <h2>Analyzing NYC's Travel Patterns</h2>
+            <p>
+                The core of this project is transforming raw data into meaningful insights. We've cleaned, processed, and analyzed millions of taxi trips to identify key trends, such as **peak travel hours**, **average speed across the city**, and the relationship between distance and **estimated fare**. This analysis feeds the dynamic dashboard below.
+            </p>
         </div>
-      </div>
-      <div class="card" style="background-image: url('https://images.unsplash.com/photo-1539967160601-d118b0917325?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG5ldyUyMHlvcmslMjBjaXR5JTIwZHJpdmVyc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600');">
-        <div class="card-content">
-          <h3>Average speed</h3>
-          <p>...</p>
+        <div class="carousel">
+            <img src="https://media.istockphoto.com/id/2212329390/photo/new-york-city-times-square-zebra-crossing-at-night-nyc.webp?a=1&b=1&s=612x612&w=0&k=20&c=jfsPamAwbxeALpnjZIhf7WVnfkVs1E_PuWEK-8tZI4U=" class="active" alt="NYC Times Square at night" />
+            <img src="https://images.unsplash.com/photo-1498618382752-02689e335b14?auto=format&fit=crop&q=60&w=600" alt="New York City street traffic" />
+            <img src="https://images.unsplash.com/photo-1601741546059-dea33c8acb50?auto=format&fit=crop&q=60&w=600" alt="New York City road" />
         </div>
-      </div>
-      <div class="card" style="background-image: url('https://media.istockphoto.com/id/2156308388/photo/crosswalk-new-york-street-scene-usa-stock-photo.webp?a=1&b=1&s=612x612&w=0&k=20&c=mGJaaNnMtzXIsDKanEchizLQD-rteGAH1w-BuJVcUwQ=');">
-        <div class="card-content">
-          <h3>Fare per kilometer</h3>
-          <p>...</p>
+    </section>
+
+    <!-- Section 3: Summary Dashboard (Cards) -->
+    <section id="summary-dashboard">
+        <h2>Live Trip Summary</h2>
+        <div class="cards" id="summary-cards">
+            <!-- Loading message while waiting for data -->
+            <p style="grid-column: 1 / -1; color: var(--secondary-color);">Loading summary data from API...</p>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Section 4: trips/hour -->
-  <section id="pricing">
-    <h2>Trip per hour</h2>
-    <p>Fare / distance</p>
-  </section>
+    <!-- Section 4: Hourly Data (Chart) -->
+    <section id="hourly-data">
+        <h2>Hourly Activity Metrics</h2>
+        <div id="chart-container">
+            <div id="hourlyChart" style="min-height: 400px; padding: 20px;">
+                <p style="text-align: center; color: var(--secondary-color);">Loading hourly metrics chart...</p>
+            </div>
+        </div>
+    </section>
 
-  <!-- Section 5: peak -->
-  <section id="contact">
-    <h2>Top pickup zones</h2>
-    <p>...</p>
-  </section>
+    <!-- Section 5: Footer -->
+    <section id="footer">
+        <h2>Project Status: Complete</h2>
+        <p style="color: #adb5bd;">
+            This application successfully demonstrates a full-stack data pipeline: Data Processing, MySQL Database Loading, Flask Backend API development, and a dynamic HTML/JavaScript/ApexCharts Frontend.
+        </p>
+    </section>
 
-  <!-- Scripts -->
-  <script>
-    // Carousel
-    let current = 0;
-    const images = document.querySelectorAll('.carousel img');
+    <!-- Scripts -->
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+        let hourlyChart = null; // Global reference for ApexChart instance
 
-    setInterval(() => {
-      images[current].classList.remove('active');
-      current = (current + 1) % images.length;
-      images[current].classList.add('active');
-    }, 3000);
+        // --- Data Fetching and Rendering ---
 
-    // Theme Toggle
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-    }
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${endpoint}`);
+                if (!response.ok) {
+                    // Throw a specific error if the response is not OK (e.g., 404, 500)
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint} data:`, error);
+                // Return null or re-throw the error based on how the caller handles it
+                throw new Error(`Could not connect to API at ${API_BASE_URL}. Is Flask server running? Details: ${error.message}`);
+            }
+        }
 
-    // Load saved theme
-    window.addEventListener("DOMContentLoaded", () => {
-      if (localStorage.getItem("theme") === "dark") {
-        document.body.classList.add("dark");
-      }
-    });
-  </script>
+        async function fetchSummaryData() {
+            const cardsContainer = document.getElementById('summary-cards');
+            try {
+                const data = await fetchData('trip_summary');
+                renderSummaryCards(data);
+            } catch (error) {
+                cardsContainer.innerHTML = `<p style="grid-column: 1 / -1; color: #dc3545; font-weight: 600;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function renderSummaryCards(data) {
+            const cardsContainer = document.getElementById('summary-cards');
+            cardsContainer.innerHTML = ''; // Clear loading message
+
+            const cardData = [
+                {
+                    title: "Total Trips",
+                    value: (data.total_trips / 1000000).toFixed(2),
+                    unit: "Million",
+                    color: '#0d6efd',
+                    icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>'
+                },
+                {
+                    title: "Avg Fare",
+                    value: data.avg_fare.toFixed(2),
+                    unit: "$",
+                    color: '#28a745',
+                    icon: '<svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>'
+                },
+                {
+                    title: "Avg Distance",
+                    value: data.avg_distance_km.toFixed(2),
+                    unit: "km",
+                    color: '#ffc107',
+                    icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>'
+                },
+                {
+                    title: "Speed Outliers",
+                    value: data.total_outliers.toLocaleString(),
+                    unit: "",
+                    color: '#dc3545',
+                    icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'
+                }
+            ];
+
+            cardData.forEach(card => {
+                const cardHtml = `
+                    <div class="card" style="border-left-color: ${card.color};">
+                        <div class="card-icon" style="color: ${card.color}; opacity: 0.3;">${card.icon}</div>
+                        <h3>${card.title}</h3>
+                        <div class="card-value">
+                            ${card.value}
+                            <span class="card-unit">${card.unit}</span>
+                        </div>
+                    </div>
+                `;
+                cardsContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        async function fetchHourlyData() {
+            const chartDiv = document.getElementById('hourlyChart');
+            try {
+                const metrics = await fetchData('hourly_metrics');
+                renderHourlyChart(metrics);
+            } catch (error) {
+                chartDiv.innerHTML = `<p style="text-align: center; color: #dc3545; font-weight: 600;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function renderHourlyChart(metrics) {
+            const hours = metrics.map(m => m.hour);
+            const trips = metrics.map(m => m.trips);
+            const avgSpeed = metrics.map(m => m.avg_speed);
+            const avgFare = metrics.map(m => m.avg_fare);
+
+            const getChartOptions = () => ({
+                chart: {
+                    type: 'line',
+                    height: '100%',
+                    toolbar: { show: true },
+                    background: 'transparent',
+                    foreColor: getComputedStyle(document.body).getPropertyValue('--text-color'), 
+                },
+                series: [
+                    {
+                        name: 'Trips Count',
+                        type: 'column',
+                        data: trips,
+                        color: '#0d6efd'
+                    },
+                    {
+                        name: 'Avg Speed (km/h)',
+                        type: 'line',
+                        data: avgSpeed,
+                        color: '#ffc107'
+                    },
+                    {
+                        name: 'Avg Fare ($)',
+                        type: 'line',
+                        data: avgFare,
+                        color: '#28a745'
+                    }
+                ],
+                xaxis: {
+                    categories: hours.map(h => `${h}:00`),
+                    title: { text: 'Time of Day (Hour)' },
+                    labels: {
+                        style: { colors: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                    }
+                },
+                yaxis: [
+                    {
+                        seriesName: 'Trips Count',
+                        title: { text: 'Total Trips', style: { color: '#0d6efd' } },
+                        labels: { formatter: (val) => val.toLocaleString(), style: { colors: getComputedStyle(document.body).getPropertyValue('--text-color') } }
+                    },
+                    {
+                        opposite: true,
+                        seriesName: 'Avg Speed (km/h)',
+                        title: { text: 'Speed/Fare (Unit)', style: { color: '#ffc107' } },
+                        labels: { formatter: (val) => val.toFixed(2), style: { colors: getComputedStyle(document.body).getPropertyValue('--text-color') } }
+                    },
+                ],
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    theme: document.body.classList.contains('dark') ? 'dark' : 'light'
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'left',
+                    labels: { colors: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                },
+                grid: {
+                    borderColor: getComputedStyle(document.body).getPropertyValue('--secondary-color'),
+                    strokeDashArray: 5
+                }
+            });
+
+            if (hourlyChart) {
+                hourlyChart.updateOptions(getChartOptions());
+            } else {
+                hourlyChart = new ApexCharts(document.querySelector("#hourlyChart"), getChartOptions());
+                hourlyChart.render();
+            }
+        }
+
+        // --- Utility Functions ---
+
+        // Carousel
+        let current = 0;
+        const images = document.querySelectorAll('.carousel img');
+        if (images.length > 0) {
+            // Initial active class setup
+            images[0].classList.add('active'); 
+            
+            setInterval(() => {
+                images[current].classList.remove('active');
+                current = (current + 1) % images.length;
+                images[current].classList.add('active');
+            }, 3000);
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+            
+            // If the chart exists, update its colors for dark/light mode
+            if (hourlyChart) {
+                // Re-fetch and re-render chart to ensure colors are updated
+                fetchHourlyData(); 
+            }
+        }
+
+        // Load saved theme and run initialization
+        window.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("theme") === "dark") {
+                document.body.classList.add("dark");
+            }
+            
+            // Start fetching data for all sections
+            fetchSummaryData();
+            fetchHourlyData();
+        });
+    </script>
 
 </body>
 </html>
