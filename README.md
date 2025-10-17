@@ -3,10 +3,11 @@
 The NewYorkCity Taxi App is an enterprise-level fullstack application designed to analyse and visualise urban mobility patterns using the New York City Taxi Trip Databaset. It demonstrates data cleaning, storing processed data, backend development, and frontend visualisation of the app. 
 ## Tech Stack
 
-- Backend: Node.js
-- Data processing: python
+- Backend API: Python/flask
+- Data processing: pandas
 - Database: MySQL
 - Frontend: HTML, CSS, JavaScript
+- version control: Git LFS
 
 ## Project structure
 ```
@@ -38,30 +39,65 @@ NYCity-Taxi-App/
 ```
 
 ## Setup Instructions
+1. Prerequisites
+You must have the following installed:
+- python 3.8+
+- Node.js and npm
+- MySQL server(ensure it's running locally)
+
+### Install Git LFS
+`git lfs install`
+### clone the repo
+`git clone https://github.com/Linda5-umwali/NYCity-Taxi-App.git`
+
+### navigate to the project folder
+`cd NYCity-Taxi-App`
+### Ensure the large CSV file is downloaded by LFS
+`git lfs pull`
+
+### backend
+`cd backend`
+
+### Create and activate environment(venv)
+`python -m venv venv`
+`source venv/bin/activate`
+
+### independencies
+`pip install -r requirements.txt`
+
+### Configure Database:
+
+Add your MySQL credentials (replace placeholders with your actual details):
+
 ```
-# clone the repo
-git clone https://github.com/Linda5-umwali/NYCity-Taxi-App.git
-
-# navigate to the project folder
-cd NYCity-Taxi-App
-
-# Create and activate environment(venv)
-python -m venv venv
-source venv/bin/activate
-
-# independencies
-pip install -r requirements.txt
-
-# backend
-cd backend
-python db_data.py
-
-# frontend
-cd NYCity-Taxi-App/frontend
-
-# Run the app
-python3 app.py
+[mysql]
+host=127.0.0.1
+user=your_mysql_user
+password=your_mysql_password
+database=taxi_db
 ```
+
+Create the MySQL database named taxi_db manually in your MySQL workbench or client.
+
+Run Data Loading Script: This script will connect to the database, create the necessary table, and load the 279MB data from cleaned_taxi.csv into MySQL.
+
+`python3 data_load.py`
+
+### Run the app
+`python3 app.py`
+
+### frontend
+`cd NYCity-Taxi-App/frontend`
+
+### Install Node dependencies:
+
+`npm install`
+
+### Launch the React frontend:
+
+`npm start`
+
+The application will automatically open in your browser, typically at http://localhost:3000.
 
 ## Dataset
 
