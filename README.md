@@ -65,6 +65,11 @@ You must have the following installed:
 ### independencies
 `pip install -r requirements.txt`
 
+### back to backend
+`python3 data_processing.py`
+#this file contain the script that clean the train.csv data
+#I couldn't push the large file cleaned_taxi.csv containing the cleaned data on github, so if you run this script, you'll have the file localy and will be able to precede with the other steps.
+
 ### Configure Database:
 
 Add your MySQL credentials (replace placeholders with your actual details):
@@ -97,7 +102,7 @@ Run Data Loading Script: This script will connect to the database, create the ne
 
 `npm start`
 
-The application will automatically open in your browser, typically at http://localhost:3000.
+The application will automatically open in your browser, typically at http://localhost:127.0.0.1.
 
 ## Dataset
 
